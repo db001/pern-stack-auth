@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export PGPASSWORD='postgres'
+source ./config.sh
+export PGPASSWORD=$PGPASSWORD
 
 echo "Configuring db"
 
