@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "configure": "sh ./configure_db.sh",
-    "con-dev": "npm run configure && nodemon server"
+    "con-dev": "npm run configure && nodemon server",
+    "server": "nodemon server"
   },
   "keywords": [],
   "author": "henry",

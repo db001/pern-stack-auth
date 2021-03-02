@@ -19,6 +19,12 @@ module.exports = function (req, res, next) {
     } else if (!validEmail(email)) {
       return res.json("Invalid Email");
     }
+  } else if (req.path === "password-reset") {
+    if (![email].every(Boolean)) {
+      return res.json("Missing Credentials");
+    } else if (!validEmail(email)) {
+      return res.json("Invalid Email");
+    }
   }
 
   next();

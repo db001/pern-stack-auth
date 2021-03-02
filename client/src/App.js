@@ -16,6 +16,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/dashboard/Dashboard";
 import Landing from "./components/Landing";
+import PasswordReset from "./components/PasswordReset";
 
 toast.configure();
 
@@ -91,6 +92,18 @@ function App() {
                   <Dashboard {...props} setAuth={setAuth} />
                 ) : (
                   <Redirect to="/login" />
+                )
+              }
+            />
+
+            <Route
+              exact
+              path="/password-reset"
+              render={props =>
+                !isAuthenticated ? (
+                  <PasswordReset {...props} setAuth={setAuth} />
+                ) : (
+                  <Redirect to="/dashboard" />
                 )
               }
             />

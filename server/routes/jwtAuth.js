@@ -64,6 +64,27 @@ router.post("/login", validInfo, async (req, res) => {
   }
 });
 
+router.post("/sendreset", validInfo, async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await pool.query("SELECT * FROM users WHERE user_email = $1", [
+      email
+    ]);
+
+    if (user.rows.length === 0) {
+      // return res.status(401).json("Email address not registered");
+      return res.json({ error: "Email address not recognised"});
+    }
+
+    // const jwtToken = jwtGenerator(user.rows[0].user_id);
+    return res.json("Email sent");
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+})
+
 router.post("/verify", authorize, (req, res) => {
   try {
     res.json(true);
