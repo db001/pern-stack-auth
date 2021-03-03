@@ -5,6 +5,8 @@ const pool = require("../db");
 const validInfo = require("../middleware/validInfo");
 const jwtGenerator = require("../utils/jwtGenerator");
 const authorize = require("../middleware/authorize");
+const transport = require("../utils/nodemailer");
+const sgMail = require("@sendgrid/mail");
 
 //authorization
 router.post("/register", validInfo, async (req, res) => {
@@ -29,6 +31,33 @@ router.post("/register", validInfo, async (req, res) => {
     );
 
     const jwtToken = jwtGenerator(newUser.rows[0].user_id);
+
+    sgMail.setApiKey(process.env.SENDGRIDAPI);
+
+    const message = {
+      from: 'doggadave+sendgriduser@gmail.com',
+      to: 'doggadave+sendgridtest@gmail.com',
+      subject: 'It lives',
+      text: 'My message'
+    }
+
+    sgMail.send(message)
+    .then(() => {
+      console.log('Sendgrid mail sent');
+    })
+    .catch(err => {
+      console.log(`Sendgrid error: ${err}`);
+    });
+
+    /* Nodemailer code */
+    // transport.sendMail(message, (err, info) => {
+    //   if(err) {
+    //     console.log(`Email error: ${err}`);
+    //   } else {
+    //     console.log('Email sent');
+    //   }
+    // })
+
     return res.json({ jwtToken });
   } catch (err) {
     console.error(err.message);
