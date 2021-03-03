@@ -16,6 +16,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/dashboard/Dashboard";
 import Landing from "./components/Landing";
+import Confirm from "./components/Confirmation";
 
 toast.configure();
 
@@ -94,6 +95,11 @@ function App() {
                 )
               }
             />
+            <Route
+              path="/confirm"
+            >
+              <Confirm />
+            </Route>
           </Switch>
         </div>
       </Router>

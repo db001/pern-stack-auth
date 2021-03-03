@@ -5,7 +5,7 @@ const pool = require("../db");
 const validInfo = require("../middleware/validInfo");
 const jwtGenerator = require("../utils/jwtGenerator");
 const authorize = require("../middleware/authorize");
-const transport = require("../utils/nodemailer");
+// const transport = require("../utils/nodemailer");
 const sgMail = require("@sendgrid/mail");
 
 //authorization
@@ -25,11 +25,13 @@ router.post("/register", validInfo, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const bcryptPassword = await bcrypt.hash(password, salt);
 
+    const token = jwtGenerator(name);
+    
     let newUser = await pool.query(
-      "INSERT INTO users (user_name, user_email, user_password) VALUES ($1, $2, $3) RETURNING *",
-      [name, email, bcryptPassword]
-    );
-
+      "INSERT INTO users (user_name, user_email, user_password, token) VALUES ($1, $2, $3, $4) RETURNING *",
+      [name, email, bcryptPassword, token]
+      );
+      
     const jwtToken = jwtGenerator(newUser.rows[0].user_id);
 
     sgMail.setApiKey(process.env.SENDGRIDAPI);
@@ -38,7 +40,12 @@ router.post("/register", validInfo, async (req, res) => {
       from: 'doggadave+sendgriduser@gmail.com',
       to: 'doggadave+sendgridtest@gmail.com',
       subject: 'It lives',
-      text: 'My message'
+      text: 'My message',
+      html: `
+        <h1>Hello ${name}</h1>
+        <p>Thanks for signing up</p>
+        <p>To confirm your email, please <a href="http://localhost:3000/confirm/${token}">click here</a>
+      `
     }
 
     sgMail.send(message)
@@ -101,5 +108,30 @@ router.post("/verify", authorize, (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+router.get("/confirm/:token", async (req, res) => {
+  const confirmCode = req.params.token;
+
+  try {
+    const user = await pool.query("SELECT * FROM users WHERE token = $1", [
+      confirmCode
+    ]);
+
+    if (user.rows.length === 0) {
+      return res.status(401).json("Invalid Credential");
+    }
+
+    await pool.query("UPDATE users SET is_verified =$1 WHERE token = $2", [
+      true, confirmCode
+    ]);
+
+    res.json({ user: user.rows[0].name });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+
+})
 
 module.exports = router;
