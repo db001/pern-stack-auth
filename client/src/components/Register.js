@@ -6,7 +6,8 @@ const Register = ({ setAuth }) => {
   const [inputs, setInputs] = useState({
     email: "",
     password: "",
-    name: ""
+    name: "",
+    timestamp: ""
   });
 
   const { email, password, name } = inputs;
@@ -17,7 +18,8 @@ const Register = ({ setAuth }) => {
   const onSubmitForm = async e => {
     e.preventDefault();
     try {
-      const body = { email, password, name };
+      const timestamp = Date.now();
+      const body = { email, password, name, timestamp };
       const response = await fetch(
         "http://localhost:5000/authentication/register",
         {

@@ -24,7 +24,7 @@ const ListTodos = ({ allTodos, setTodosChange }) => {
     setTodos(allTodos);
   }, [allTodos]);
 
-  console.log(todos);
+  // console.log(todos);
 
   return (
     <Fragment>
