@@ -25,7 +25,7 @@ router.post("/register", validInfo, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const bcryptPassword = await bcrypt.hash(password, salt);
 
-    const token = jwtGenerator(name);
+    const token = jwtGenerator(name).slice(0, 26);
     
     let newUser = await pool.query(
       "INSERT INTO users (user_name, user_email, user_password, token) VALUES ($1, $2, $3, $4) RETURNING *",
@@ -38,7 +38,7 @@ router.post("/register", validInfo, async (req, res) => {
 
     const message = {
       from: 'doggadave+sendgriduser@gmail.com',
-      to: 'doggadave+sendgridtest@gmail.com',
+      to: email,
       subject: 'It lives',
       text: 'My message',
       html: `
@@ -109,20 +109,22 @@ router.post("/verify", authorize, (req, res) => {
   }
 });
 
-router.get("/confirm/:token", async (req, res) => {
+router.put("/confirm/:token", async (req, res) => {
   const confirmCode = req.params.token;
 
+  console.log('Code: ' + confirmCode);
+
   try {
-    const user = await pool.query("SELECT * FROM users WHERE token = $1", [
+    const user = await pool.query("SELECT * FROM users WHERE token = $1 RETURNING *", [
       confirmCode
     ]);
 
     if (user.rows.length === 0) {
-      return res.status(401).json("Invalid Credential");
+      return res.json("Invalid Credential");
     }
 
-    await pool.query("UPDATE users SET is_verified =$1 WHERE token = $2", [
-      true, confirmCode
+    await pool.query("UPDATE users SET is_verified = $1 WHERE token = $2", [
+      TRUE, confirmCode
     ]);
 
     res.json({ user: user.rows[0].name });
